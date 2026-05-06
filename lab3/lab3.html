@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Лабораторна робота №3 - Варіант 6</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .task-block {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+      }
+      .result {
+        margin-top: 10px;
+        color: #2c3e50;
+        background: #f9f9f9;
+        padding: 10px;
+        border-left: 4px solid #3498db;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Лабораторна робота №3 (Варіант 6)</h1>
+
+    <div class="task-block">
+      <h3>Завдання 1: Поточна дата</h3>
+      <button onclick="showTask1()">Виконати</button>
+      <div id="result1" class="result">Тут з'явиться дата...</div>
+    </div>
+
+    <div class="task-block">
+      <h3>Завдання 6: Форматування обраної дати (ДД.ММ.РРРР)</h3>
+      <input type="date" id="dateInput6" />
+      <button onclick="showTask6()">Форматувати</button>
+      <div id="result6" class="result">Тут з'явиться результат...</div>
+    </div>
+
+    <script src="lab3_lib.js"></script>
+    <script src="lab3.js"></script>
+  </body>
+</html>
