@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Query Test</title>
+  </head>
+  <body>
+    <h1>Test Query</h1>
+    <button onclick="runTest()">Запустити тест</button>
+
+    <pre id="out"></pre>
+
+    <script src="script.js"></script>
+
+    <script>
+      function runTest() {
+        const data = [
+          { name: "Alex", age: 20, city: "Kyiv" },
+          { name: "Bob", age: 25, city: "Lviv" },
+          { name: "Ann", age: 20, city: "Kyiv" },
+        ];
+
+        const result = query(
+          data,
+          filterIn("age", [20]),
+          select("name", "city"),
+        );
+
+        document.getElementById("out").innerText = JSON.stringify(
+          result,
+          null,
+          2,
+        );
+      }
+    </script>
+  </body>
+</html>
