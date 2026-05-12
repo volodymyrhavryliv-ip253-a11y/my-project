@@ -1,0 +1,3007 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lapotasite 3000 — Система обліку абонементів</title>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --primary-light: #4f46e5;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .header-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .header-nav a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-lg {
+            padding: 14px 28px;
+            font-size: 1rem;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 24px 80px;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 50px;
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            margin-top: 60px;
+            position: relative;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-image-wrapper {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 8px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+        }
+
+        /* Features */
+        .features {
+            padding: 100px 24px;
+            background: var(--bg-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.2));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Benefits */
+        .benefits {
+            padding: 100px 24px;
+            background: var(--bg-secondary);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .benefit-item {
+            text-align: center;
+        }
+
+        .benefit-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .benefit-item h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .benefit-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Tech Stack */
+        .tech {
+            padding: 100px 24px;
+            background: var(--bg-primary);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .tech-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .tech-card:hover {
+            border-color: var(--primary);
+        }
+
+        .tech-card i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .tech-card h4 {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tech-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 24px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-info p {
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        .landing.hidden {
+            display: none;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.2));
+            color: var(--primary);
+        }
+
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 64px;
+            padding: 32px;
+            min-height: calc(100vh - 64px);
+            width: calc(100% - 260px);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.blue {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-icon.red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            background: var(--bg-secondary);
+        }
+
+        tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            height: 200px;
+            padding: 20px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: var(--transition);
+            min-width: 30px;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+            margin-top: 8px;
+        }
+
+        .chart-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .form-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        select.form-input {
+            cursor: pointer;
+        }
+
+        /* Search and Filters */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+            min-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.blue {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .activity-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            font-size: 0.8rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            margin-bottom: 8px;
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Dashboard specific grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid-2,
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-nav {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 24px 16px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table-wrapper {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px 12px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Auth Pages */
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+        }
+
+        .auth-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-header .logo {
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .auth-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Role Selector */
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .role-option {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .role-option:hover {
+            border-color: var(--primary-light);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .role-option i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .role-option h4 {
+            font-weight: 600;
+        }
+
+        .role-option p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Avatar */
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+        }
+
+        .user-details h4 {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: relative;
+        }
+
+        .notification-badge::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <a href="#" class="logo" onclick="showLanding()">
+            <div class="logo-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <span>lapotasite 3000</span>
+        </a>
+        
+        <nav class="header-nav" id="landingNav">
+            <a href="#features">Можливості</a>
+            <a href="#benefits">Переваги</a>
+            <a href="#tech">Технології</a>
+        </nav>
+
+        <nav class="header-nav" id="dashboardNav" style="display: none;">
+            <span style="color: var(--text-secondary);">
+                <i class="fas fa-calendar-alt"></i>
+                <span id="currentDate"></span>
+            </span>
+        </nav>
+
+        <div class="header-actions">
+            <button class="theme-toggle" onclick="toggleTheme()" data-tooltip="Змінити тему">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <button class="btn btn-secondary" id="loginBtn" onclick="showAuthModal('login')">Увійти</button>
+            <button class="btn btn-primary" id="registerBtn" onclick="showAuthModal('register')">Реєстрація</button>
+            <div id="userMenu" style="display: none;">
+                <div class="avatar" id="userAvatar">АК</div>
+            </div>
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Landing Page -->
+    <main class="landing" id="landingPage">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge">
+                <i class="fas fa-sparkles"></i>
+                Нова версія 2.0
+            </div>
+            <h1>Система обліку<br>абонементів</h1>
+            <p>Сучасне об'єктно-орієнтоване рішення для автоматизації управління клієнтами, абонементами та платежами</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary btn-lg" onclick="showAuthModal('register')">
+                    <i class="fas fa-rocket"></i>
+                    Спробувати безкоштовно
+                </button>
+                <button class="btn btn-outline btn-lg" onclick="showDemo()">
+                    <i class="fas fa-play"></i>
+                    Переглянути демо
+                </button>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-wrapper">
+                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></div>
+                            <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></div>
+                            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%;"></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                            <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.2)); padding: 20px; border-radius: 8px;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">156</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Активних</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2)); padding: 20px; border-radius: 8px;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--success);">₴48K</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Дохід</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2)); padding: 20px; border-radius: 8px;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">23</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Нових</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2)); padding: 20px; border-radius: 8px;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--danger);">8</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Прострочені</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Потужний функціонал</h2>
+                    <p>Все необхідне для ефективного управління абонементами в одній системі</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Управління клієнтами</h3>
+                        <p>Створення, редагування та видалення профілів клієнтів. Зручний пошук та фільтрація за будь-якими параметрами.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <h3>Абонементи</h3>
+                        <p>Гнучкі типи абонементів: разові, місячні, річні. Автоматичне відстеження статусів та термінів дії.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h3>Оплати</h3>
+                        <p>Фіксація платежів з повною історією. Підтримка різних способів оплати та автоматичні звіти.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Аналітика</h3>
+                        <p>Детальна статистика: активні абонементи, дохід за період, динаміка росту клієнтської бази.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h3>Сповіщення</h3>
+                        <p>Автоматичні нагадування про закінчення абонементів. Персоналізовані повідомлення клієнтам.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Безпека</h3>
+                        <p>Розмежування доступу за ролями: Адміністратор та Менеджер. Захищена авторизація.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits -->
+        <section class="benefits" id="benefits">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Чому обирають нас</h2>
+                    <p>Реальні переваги для вашого бізнесу</p>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <div class="benefit-number">80%</div>
+                        <h4>Економія часу</h4>
+                        <p>Автоматизація рутинних процесів</p>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-number">99.9%</div>
+                        <h4>Надійність</h4>
+                        <p>Безперебійна робота системи</p>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-number">24/7</div>
+                        <h4>Доступність</h4>
+                        <p>Працюйте з будь-якого пристрою</p>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-number">0₴</div>
+                        <h4>Пробний період</h4>
+                        <p>14 днів безкоштовно</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech -->
+        <section class="tech" id="tech">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Технології</h2>
+                    <p>Сучасний стек для надійної роботи</p>
+                </div>
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <i class="fas fa-cubes"></i>
+                        <h4>ООП Архітектура</h4>
+                        <p>Чистий код з використанням патернів проєктування</p>
+                    </div>
+                    <div class="tech-card">
+                        <i class="fas fa-server"></i>
+                        <h4>Надійний Backend</h4>
+                        <p>Масштабований серверний застосунок</p>
+                    </div>
+                    <div class="tech-card">
+                        <i class="fas fa-database"></i>
+                        <h4>База даних</h4>
+                        <p>Оптимізоване зберігання даних</p>
+                    </div>
+                    <div class="tech-card">
+                        <i class="fas fa-lock"></i>
+                        <h4>Захист даних</h4>
+                        <p>Шифрування та безпечна авторизація</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-info">
+                        <a href="#" class="logo">
+                            <div class="logo-icon">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <span>lapotasite 3000</span>
+                        </a>
+                        <p>© 2025 lapotasite 3000. Всі права захищені.</p>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#">Документація</a>
+                        <a href="#">Підтримка</a>
+                        <a href="#">Конфіденційність</a>
+                        <a href="#">Умови використання</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboardPage">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <a class="sidebar-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-th-large"></i>
+                    <span>Дашборд</span>
+                </a>
+                <a class="sidebar-item" onclick="showSection('clients')">
+                    <i class="fas fa-users"></i>
+                    <span>Клієнти</span>
+                </a>
+                <a class="sidebar-item" onclick="showSection('subscriptions')">
+                    <i class="fas fa-id-card"></i>
+                    <span>Абонементи</span>
+                </a>
+                <a class="sidebar-item" onclick="showSection('payments')">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Оплати</span>
+                </a>
+                <a class="sidebar-item" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Аналітика</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Система</div>
+                <nav class="sidebar-nav">
+                    <a class="sidebar-item notification-badge" onclick="showSection('notifications')">
+                        <i class="fas fa-bell"></i>
+                        <span>Сповіщення</span>
+                    </a>
+                    <a class="sidebar-item" onclick="showSection('settings')">
+                        <i class="fas fa-cog"></i>
+                        <span>Налаштування</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="user-info">
+                <div class="avatar" id="sidebarAvatar">АК</div>
+                <div class="user-details">
+                    <h4 id="sidebarUserName">Адмін Користувач</h4>
+                    <p id="sidebarUserRole">Адміністратор</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section class="page-section active" id="section-dashboard">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Дашборд</h1>
+                        <p>Огляд ключових показників системи</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('subscriptionModal')">
+                        <i class="fas fa-plus"></i>
+                        Новий абонемент
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                12%
+                            </div>
+                        </div>
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Активних абонементів</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon green">
+                                <i class="fas fa-hryvnia-sign"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                8%
+                            </div>
+                        </div>
+                        <div class="stat-value">₴48,200</div>
+                        <div class="stat-label">Дохід за місяць</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                23%
+                            </div>
+                        </div>
+                        <div class="stat-value">23</div>
+                        <div class="stat-label">Нових клієнтів</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon red">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-trend down">
+                                <i class="fas fa-arrow-down"></i>
+                                5%
+                            </div>
+                        </div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Прострочених</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Дохід за місяцями</h3>
+                            <select class="filter-select" style="padding: 8px 12px;">
+                                <option>2025</option>
+                                <option>2024</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-bars">
+                                <div class="chart-bar" style="height: 60%;" data-value="Січ"></div>
+                                <div class="chart-bar" style="height: 75%;" data-value="Лют"></div>
+                                <div class="chart-bar" style="height: 65%;" data-value="Бер"></div>
+                                <div class="chart-bar" style="height: 85%;" data-value="Кві"></div>
+                                <div class="chart-bar" style="height: 70%;" data-value="Тра"></div>
+                                <div class="chart-bar" style="height: 90%;" data-value="Чер"></div>
+                                <div class="chart-bar" style="height: 95%;" data-value="Лип"></div>
+                                <div class="chart-bar" style="height: 80%;" data-value="Сер"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Останні дії</h3>
+                            <a href="#" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">Всі</a>
+                        </div>
+                        <div class="card-body" style="padding: 8px 24px;">
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon green">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Новий клієнт: Олена Петрова</div>
+                                        <div class="activity-time">10 хвилин тому</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon blue">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Оплата ₴1,200 — Іван Коваленко</div>
+                                        <div class="activity-time">1 година тому</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon green">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Абонемент активовано: #1234</div>
+                                        <div class="activity-time">2 години тому</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon blue">
+                                        <i class="fas fa-sync"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Продовжено абонемент: Марія Шевченко</div>
+                                        <div class="activity-time">3 години тому</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section class="page-section" id="section-clients">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Клієнти</h1>
+                        <p>Управління базою клієнтів</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('clientModal')">
+                        <i class="fas fa-plus"></i>
+                        Додати клієнта
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="search-input" placeholder="Пошук за ім'ям, email, телефоном...">
+                            </div>
+                            <select class="filter-select">
+                                <option value="">Всі статуси</option>
+                                <option value="active">Активні</option>
+                                <option value="inactive">Неактивні</option>
+                            </select>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ПІБ</th>
+                                        <th>Email</th>
+                                        <th>Телефон</th>
+                                        <th>Дата реєстрації</th>
+                                        <th>Статус</th>
+                                        <th>Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clientsTable">
+                                    <tr>
+                                        <td><strong>Іван Коваленко</strong></td>
+                                        <td>ivan.kovalenko@email.com</td>
+                                        <td>+380 67 123 4567</td>
+                                        <td>15.01.2025</td>
+                                        <td><span class="badge badge-success">Активний</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати" onclick="openModal('clientModal')"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn delete" data-tooltip="Видалити"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Олена Петрова</strong></td>
+                                        <td>olena.petrova@email.com</td>
+                                        <td>+380 50 234 5678</td>
+                                        <td>22.02.2025</td>
+                                        <td><span class="badge badge-success">Активний</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn delete" data-tooltip="Видалити"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Марія Шевченко</strong></td>
+                                        <td>maria.shevchenko@email.com</td>
+                                        <td>+380 63 345 6789</td>
+                                        <td>10.03.2025</td>
+                                        <td><span class="badge badge-warning">Прострочено</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn delete" data-tooltip="Видалити"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Андрій Бондаренко</strong></td>
+                                        <td>andrii.bondarenko@email.com</td>
+                                        <td>+380 98 456 7890</td>
+                                        <td>05.04.2025</td>
+                                        <td><span class="badge badge-secondary">Неактивний</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn delete" data-tooltip="Видалити"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subscriptions Section -->
+            <section class="page-section" id="section-subscriptions">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Абонементи</h1>
+                        <p>Управління абонементами клієнтів</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('subscriptionModal')">
+                        <i class="fas fa-plus"></i>
+                        Новий абонемент
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="search-input" placeholder="Пошук за номером або клієнтом...">
+                            </div>
+                            <select class="filter-select">
+                                <option value="">Всі типи</option>
+                                <option value="single">Разовий</option>
+                                <option value="monthly">Місячний</option>
+                                <option value="yearly">Річний</option>
+                            </select>
+                            <select class="filter-select">
+                                <option value="">Всі статуси</option>
+                                <option value="active">Активні</option>
+                                <option value="expired">Прострочені</option>
+                                <option value="completed">Завершені</option>
+                            </select>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>№</th>
+                                        <th>Клієнт</th>
+                                        <th>Тип</th>
+                                        <th>Початок</th>
+                                        <th>Закінчення</th>
+                                        <th>Статус</th>
+                                        <th>Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>#1234</strong></td>
+                                        <td>Іван Коваленко</td>
+                                        <td><span class="badge badge-secondary">Місячний</span></td>
+                                        <td>01.04.2025</td>
+                                        <td>30.04.2025</td>
+                                        <td><span class="badge badge-success">Активний</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" data-tooltip="Продовжити"><i class="fas fa-redo"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#1235</strong></td>
+                                        <td>Олена Петрова</td>
+                                        <td><span class="badge badge-secondary">Річний</span></td>
+                                        <td>15.01.2025</td>
+                                        <td>15.01.2026</td>
+                                        <td><span class="badge badge-success">Активний</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" data-tooltip="Продовжити"><i class="fas fa-redo"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#1230</strong></td>
+                                        <td>Марія Шевченко</td>
+                                        <td><span class="badge badge-secondary">Місячний</span></td>
+                                        <td>01.03.2025</td>
+                                        <td>31.03.2025</td>
+                                        <td><span class="badge badge-danger">Прострочений</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Редагувати"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" data-tooltip="Продовжити"><i class="fas fa-redo"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#1220</strong></td>
+                                        <td>Андрій Бондаренко</td>
+                                        <td><span class="badge badge-secondary">Разовий</span></td>
+                                        <td>10.02.2025</td>
+                                        <td>10.02.2025</td>
+                                        <td><span class="badge badge-warning">Завершений</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Переглянути"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payments Section -->
+            <section class="page-section" id="section-payments">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Оплати</h1>
+                        <p>Історія платежів та транзакцій</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('paymentModal')">
+                        <i class="fas fa-plus"></i>
+                        Додати оплату
+                    </button>
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">₴48,200</div>
+                        <div class="stat-label">Отримано за місяць</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">₴5,400</div>
+                        <div class="stat-label">Очікується</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon red">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">₴2,100</div>
+                        <div class="stat-label">Прострочено</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="search-input" placeholder="Пошук за клієнтом або номером...">
+                            </div>
+                            <select class="filter-select">
+                                <option value="">Всі способи оплати</option>
+                                <option value="card">Картка</option>
+                                <option value="cash">Готівка</option>
+                                <option value="transfer">Переказ</option>
+                            </select>
+                            <input type="date" class="filter-select">
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Клієнт</th>
+                                        <th>Сума</th>
+                                        <th>Спосіб</th>
+                                        <th>Дата</th>
+                                        <th>Статус</th>
+                                        <th>Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>#P-4521</strong></td>
+                                        <td>Іван Коваленко</td>
+                                        <td><strong>₴1,200</strong></td>
+                                        <td><i class="fas fa-credit-card" style="color: var(--primary);"></i> Картка</td>
+                                        <td>28.04.2025</td>
+                                        <td><span class="badge badge-success">Оплачено</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Квитанція"><i class="fas fa-receipt"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#P-4520</strong></td>
+                                        <td>Олена Петрова</td>
+                                        <td><strong>₴8,400</strong></td>
+                                        <td><i class="fas fa-university" style="color: var(--success);"></i> Переказ</td>
+                                        <td>27.04.2025</td>
+                                        <td><span class="badge badge-success">Оплачено</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Квитанція"><i class="fas fa-receipt"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#P-4518</strong></td>
+                                        <td>Марія Шевченко</td>
+                                        <td><strong>₴1,200</strong></td>
+                                        <td><i class="fas fa-money-bill" style="color: var(--warning);"></i> Готівка</td>
+                                        <td>25.04.2025</td>
+                                        <td><span class="badge badge-warning">Очікується</span></td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="action-btn" data-tooltip="Підтвердити"><i class="fas fa-check"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">4</button>
+                            <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section class="page-section" id="section-analytics">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Аналітика</h1>
+                        <p>Статистика та звіти</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <select class="filter-select">
+                            <option>Останні 30 днів</option>
+                            <option>Останні 90 днів</option>
+                            <option>Цей рік</option>
+                        </select>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-download"></i>
+                            Експорт
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                15%
+                            </div>
+                        </div>
+                        <div class="stat-value">342</div>
+                        <div class="stat-label">Всього клієнтів</div>
+                        <div class="progress-bar" style="margin-top: 12px;">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon green">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                8%
+                            </div>
+                        </div>
+                        <div class="stat-value">46%</div>
+                        <div class="stat-label">Конверсія</div>
+                        <div class="progress-bar" style="margin-top: 12px;">
+                            <div class="progress-fill" style="width: 46%; background: linear-gradient(90deg, var(--success), #34d399);"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-redo"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                3%
+                            </div>
+                        </div>
+                        <div class="stat-value">78%</div>
+                        <div class="stat-label">Продовження</div>
+                        <div class="progress-bar" style="margin-top: 12px;">
+                            <div class="progress-fill" style="width: 78%; background: linear-gradient(90deg, var(--warning), #fbbf24);"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon red">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                12%
+                            </div>
+                        </div>
+                        <div class="stat-value">₴1,420</div>
+                        <div class="stat-label">Сер. чек</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Розподіл за типами абонементів</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span>Місячні</span>
+                                        <strong>58%</strong>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 58%;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span>Річні</span>
+                                        <strong>32%</strong>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 32%; background: linear-gradient(90deg, var(--success), #34d399);"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span>Разові</span>
+                                        <strong>10%</strong>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 10%; background: linear-gradient(90deg, var(--warning), #fbbf24);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Топ клієнтів</h3>
+                        </div>
+                        <div class="card-body" style="padding: 8px 24px;">
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="avatar">ОП</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Олена Петрова</div>
+                                        <div class="activity-time">₴25,200 за рік</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="avatar">ІК</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Іван Коваленко</div>
+                                        <div class="activity-time">₴14,400 за рік</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="avatar">МШ</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Марія Шевченко</div>
+                                        <div class="activity-time">₴12,000 за рік</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="page-section" id="section-notifications">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Сповіщення</h1>
+                        <p>Нагадування та системні повідомлення</p>
+                    </div>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-check-double"></i>
+                        Прочитати всі
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="activity-list">
+                            <div class="activity-item" style="background: rgba(239, 68, 68, 0.05); margin: -16px -24px; padding: 24px; border-radius: var(--radius-sm);">
+                                <div class="activity-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Абонемент #1230 прострочено</div>
+                                    <div class="activity-time">Клієнт: Марія Шевченко • Термін: 31.03.2025</div>
+                                </div>
+                                <button class="btn btn-sm btn-primary">Зв'язатися</button>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Абонемент #1234 закінчується через 3 дні</div>
+                                    <div class="activity-time">Клієнт: Іван Коваленко • Термін: 30.04.2025</div>
+                                </div>
+                                <button class="btn btn-sm btn-secondary">Нагадати</button>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Новий клієнт зареєструвався</div>
+                                    <div class="activity-time">Олена Петрова • 10 хвилин тому</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon blue">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Отримано оплату ₴1,200</div>
+                                    <div class="activity-time">Від: Іван Коваленко • 1 година тому</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="page-section" id="section-settings">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Налаштування</h1>
+                        <p>Конфігурація системи</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Профіль</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Ім'я</label>
+                                <input type="text" class="form-input" value="Адмін Користувач">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" value="admin@substrack.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Роль</label>
+                                <input type="text" class="form-input" value="Адміністратор" disabled>
+                            </div>
+                            <button class="btn btn-primary">Зберегти зміни</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Безпека</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Поточний пароль</label>
+                                <input type="password" class="form-input" placeholder="••••••••">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Новий пароль</label>
+                                <input type="password" class="form-input" placeholder="••••••••">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Підтвердити пароль</label>
+                                <input type="password" class="form-input" placeholder="••••••••">
+                            </div>
+                            <button class="btn btn-primary">Змінити пароль</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">
+                        <h3 class="card-title">Сповіщення</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                                <span>Нагадування про закінчення абонементів</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                                <span>Сповіщення про нових клієнтів</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                                <span>Сповіщення про оплати</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--primary);">
+                                <span>Email-розсилка</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Вийти з системи
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="authModalTitle">Вхід</h3>
+                <button class="modal-close" onclick="closeModal('authModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Увійти
+                    </button>
+                    <div class="auth-footer">
+                        <p>Немає акаунту? <a href="#" onclick="showAuthModal('register')">Зареєструватися</a></p>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" style="display: none;">
+                    <div class="role-selector">
+                        <div class="role-option selected" onclick="selectRole(this, 'admin')">
+                            <i class="fas fa-user-shield"></i>
+                            <h4>Адміністратор</h4>
+                            <p>Повний доступ</p>
+                        </div>
+                        <div class="role-option" onclick="selectRole(this, 'manager')">
+                            <i class="fas fa-user-tie"></i>
+                            <h4>Менеджер</h4>
+                            <p>Обмежений доступ</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ім'я</label>
+                        <input type="text" class="form-input" placeholder="Ваше ім'я" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" class="form-input" placeholder="Мінімум 8 символів" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Зареєструватися
+                    </button>
+                    <div class="auth-footer">
+                        <p>Вже є акаунт? <a href="#" onclick="showAuthModal('login')">Увійти</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal-overlay" id="clientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Додати клієнта</h3>
+                <button class="modal-close" onclick="closeModal('clientModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm">
+                    <div class="form-group">
+                        <label class="form-label">ПІБ *</label>
+                        <input type="text" class="form-input" placeholder="Іван Петрович Коваленко" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-input" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Телефон *</label>
+                            <input type="tel" class="form-input" placeholder="+380 XX XXX XXXX" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Примітки</label>
+                        <textarea class="form-input" rows="3" placeholder="Додаткова інформація..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('clientModal')">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveClient()">
+                    <i class="fas fa-save"></i>
+                    Зберегти
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Modal -->
+    <div class="modal-overlay" id="subscriptionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Новий абонемент</h3>
+                <button class="modal-close" onclick="closeModal('subscriptionModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="subscriptionForm">
+                    <div class="form-group">
+                        <label class="form-label">Клієнт *</label>
+                        <select class="form-input" required>
+                            <option value="">Оберіть клієнта</option>
+                            <option>Іван Коваленко</option>
+                            <option>Олена Петрова</option>
+                            <option>Марія Шевченко</option>
+                            <option>Андрій Бондаренко</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Тип абонементу *</label>
+                        <select class="form-input" required onchange="updateDates(this)">
+                            <option value="">Оберіть тип</option>
+                            <option value="single">Разовий</option>
+                            <option value="monthly">Місячний</option>
+                            <option value="yearly">Річний</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата початку *</label>
+                            <input type="date" class="form-input" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Дата закінчення *</label>
+                            <input type="date" class="form-input" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Вартість (₴) *</label>
+                        <input type="number" class="form-input" placeholder="1200" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('subscriptionModal')">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveSubscription()">
+                    <i class="fas fa-save"></i>
+                    Створити
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Додати оплату</h3>
+                <button class="modal-close" onclick="closeModal('paymentModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label class="form-label">Клієнт *</label>
+                        <select class="form-input" required>
+                            <option value="">Оберіть клієнта</option>
+                            <option>Іван Коваленко</option>
+                            <option>Олена Петрова</option>
+                            <option>Марія Шевченко</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Сума (₴) *</label>
+                            <input type="number" class="form-input" placeholder="1200" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Дата *</label>
+                            <input type="date" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Спосіб оплати *</label>
+                        <select class="form-input" required>
+                            <option value="">Оберіть спосіб</option>
+                            <option value="card">Банківська картка</option>
+                            <option value="cash">Готівка</option>
+                            <option value="transfer">Банківський переказ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Примітка</label>
+                        <input type="text" class="form-input" placeholder="Коментар до оплати">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('paymentModal')">Скасувати</button>
+                <button class="btn btn-success" onclick="savePayment()">
+                    <i class="fas fa-check"></i>
+                    Підтвердити
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Auth Modal
+        function showAuthModal(type) {
+            const modal = document.getElementById('authModal');
+            const title = document.getElementById('authModalTitle');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (type === 'login') {
+                title.textContent = 'Вхід';
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                title.textContent = 'Реєстрація';
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+
+            openModal('authModal');
+        }
+
+        // Role Selection
+        function selectRole(element, role) {
+            document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        // Form Submissions
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            closeModal('authModal');
+            showDashboard();
+            showToast('Ласкаво просимо!', 'success');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            closeModal('authModal');
+            showDashboard();
+            showToast('Реєстрація успішна!', 'success');
+        });
+
+        // Navigation
+        function showLanding() {
+            document.getElementById('landingPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.remove('active');
+            document.getElementById('landingNav').style.display = 'flex';
+            document.getElementById('dashboardNav').style.display = 'none';
+            document.getElementById('loginBtn').style.display = 'block';
+            document.getElementById('registerBtn').style.display = 'block';
+            document.getElementById('userMenu').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('active');
+            document.getElementById('landingNav').style.display = 'none';
+            document.getElementById('dashboardNav').style.display = 'flex';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('registerBtn').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'block';
+            updateCurrentDate();
+        }
+
+        function showDemo() {
+            showDashboard();
+            showToast('Демо-режим активовано', 'success');
+        }
+
+        function logout() {
+            showLanding();
+            showToast('Ви вийшли з системи', 'success');
+        }
+
+        // Sidebar Section Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById('section-' + sectionId).classList.add('active');
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        // Save Functions
+        function saveClient() {
+            closeModal('clientModal');
+            showToast('Клієнта додано успішно!', 'success');
+        }
+
+        function saveSubscription() {
+            closeModal('subscriptionModal');
+            showToast('Абонемент створено!', 'success');
+        }
+
+        function savePayment() {
+            closeModal('paymentModal');
+            showToast('Оплату зафіксовано!', 'success');
+        }
+
+        // Date Functions
+        function updateDates(select) {
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const today = new Date();
+            startDate.valueAsDate = today;
+            
+            const end = new Date(today);
+            switch(select.value) {
+                case 'single':
+                    endDate.valueAsDate = today;
+                    break;
+                case 'monthly':
+                    end.setMonth(end.getMonth() + 1);
+                    endDate.valueAsDate = end;
+                    break;
+                case 'yearly':
+                    end.setFullYear(end.getFullYear() + 1);
+                    endDate.valueAsDate = end;
+                    break;
+            }
+        }
+
+        function updateCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('uk-UA', options);
+        }
+
+        // Form Validation
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.required && !this.value) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+
+        // Smooth scroll for landing page
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href.startsWith('#') && href.length > 1) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+
+        // Initialize
+        updateCurrentDate();
+    </script>
+</body>
+</html>
